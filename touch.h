@@ -3,11 +3,6 @@
  *
  * Results came from calibration program.
  * For landscape had to swap x and y and the calibration values.
- * 
- * Note from calibration program:
- * most mcufriend have touch (with icons) that extends below the TFT
- * screens without icons need to reserve a space for "erase"
- * scale the ADC values from ts.getPoint() to screen values e.g. 0-239
  */
 
 #ifndef Touch_h
@@ -37,10 +32,7 @@ class Touch
 
 public:
     //constructor
-    Touch()
-    {
-    }
-    //end of constructor
+    Touch();
 
     /*
      * isThereATouch()
@@ -49,64 +41,24 @@ public:
      * it has gone from no touch to touch.
      */
 
-    bool isThereATouch(void)
-    {
-        currentStatus = waitStableTouchOrNoTouch();
-        if (previousStatus == currentStatus)
-        {
-            return false;
-        }
-        previousStatus = currentStatus;
-        return currentStatus;
-    }
+    bool isThereATouch(void);
 
     /*
      * waitStableTouchOrNoTouch()
      *
      * touch or no touch has to be stable for 20ms
      */
-    bool waitStableTouchOrNoTouch(void)
-
-    {
-        int count = 0;
-        bool state, oldstate;
-        while (count < 4)
-        {
-            readResistiveTouch();
-            state = tp.z > MINPRESSURE;
-            if (state == oldstate)
-                count++;
-            else
-                count = 0;
-            oldstate = state;
-            delay(5);
-        }
-        return oldstate;
-    }
+    bool waitStableTouchOrNoTouch(void);
 
     /*
      * readResistiveTouch()
      */
-    void readResistiveTouch(void)
-    {
-        tp = ts.getPoint();
-        pinMode(YP, OUTPUT); //restore shared pins
-        pinMode(XM, OUTPUT);
-    }
+    void readResistiveTouch(void);
 
     /*
      * getTouchPoint()
      */
-    void getTouchPoint(int16_t *x, int16_t *y)
-    {
-#if ORIENTATION == PORTRAIT
-        *x = map(tp.x, TS_LEFT, TS_RT, 0, WIDTH);
-        *y = map(tp.y, TS_TOP, TS_BOT, 0, HEIGHT);
-#else
-        // For landscape had to swap x and y and the calibration values.
-        *y = map(tp.x, TS_RT, TS_LEFT, 0, tft.height());
-        *x = map(tp.y, TS_BOT, TS_TOP, 0, tft.width());
-#endif
-    }
+    void getTouchPoint(int16_t *x, int16_t *y);
 };
+
 #endif
