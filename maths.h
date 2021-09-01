@@ -80,8 +80,21 @@
 
 #define TERMINATOR_CHAR ('\r')
 
-//kk comment explain
-#define NO_COMMANDS 3
+/*
+ * Number of command is 3, ie enter(e), backspace(b), new game(n)
+ */
+#define NUMBER_COMMANDS 3
+
+/*
+ * Can set number of operators in use, min is 1 max is 5,
+ * so only displays that number of operators.
+ * So 5 would give you '+', '*', '-', '/', '%'
+ * So 4 would give you '+', '*', '-', '/'.
+ * So 3 would give you '+', '*', '-'.
+ * etc etc .
+ */
 #define NUMBER_OPERATORS_IN_USE 5
+
+#define IDLE_TIME_BEFORE_SHUTDOWN_MSEC 5 * 60 * 1000
 
 #endif

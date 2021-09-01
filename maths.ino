@@ -36,8 +36,9 @@
 #include "equation.h"
 #include "numbers_command.h"
 #include "touch.h"
+#include "battery.h"
 
-MCUFRIEND_kbv tft;
+MCUFRIEND_kbv lcdScreen;
 
 Equation *equHorz1;
 Equation *equHorz2;
@@ -48,13 +49,13 @@ Equation *equVert2;
 Equation *selectedEquation;
 
 Touch *touch;
+Battery *battery;
 
-Number *numbersOnScreen[12];            //-, 0, 1, ... 9.
-Command *commandsOnScreen[NO_COMMANDS]; //enter(e), backspace(b), new game(n)
+Number *numbersOnScreen[12];                //-, 0, 1, ... 9.
+Command *commandsOnScreen[NUMBER_COMMANDS]; //enter(e), backspace(b), new game(n)
 
-char *commandStrings[NO_COMMANDS] = {"Ent", "Bck", "New"};
+char *commandStrings[NUMBER_COMMANDS] = {"Ent", "Bck", "New"};
 
-char operators[5] = {'+', '*', '-', '/', '%'};
 /*
  * Can set number of operators in use, min is 1 max is 5,
  * so only displays that number of operators.
@@ -62,6 +63,7 @@ char operators[5] = {'+', '*', '-', '/', '%'};
  * So 3 would give you '+', '*', '-'.
  * etc etc .
  */
+char operators[5] = {'+', '*', '-', '/', '%'};
 
 /*
  * If "overRide" is true always indicates correct answer,
@@ -79,12 +81,12 @@ void setup()
 
     randomSeed(analogRead(A5)); //Seed generator with noise from unused AIN
 
-    uint16_t ID = tft.readID();
-    tft.begin(ID);
-    tft.setRotation(ORIENTATION);
+    uint16_t ID = lcdScreen.readID();
+    lcdScreen.begin(ID);
+    lcdScreen.setRotation(ORIENTATION);
 
-    tft.fillScreen(TFT_BLACK);
-    tft.setFont(&FreeMono18pt7b);
+    lcdScreen.fillScreen(TFT_BLACK);
+    lcdScreen.setFont(&FreeMono18pt7b);
 
     //As only a few equations generate manually
     equHorz1 = new Equation();
@@ -92,6 +94,7 @@ void setup()
     equVert1 = new Equation();
     equVert2 = new Equation();
     touch = new Touch();
+    battery = new Battery();
 
     generateEquations();
     displayNumbers();
@@ -100,6 +103,7 @@ void setup()
 
 void loop()
 {
+    long timeLastTouched;
     if (touch->isThereATouch())
     {
         int16_t xTouch;
@@ -108,6 +112,8 @@ void loop()
         char numberTouched;
         char commandTouched;
         int8_t equationNumberTouched;
+
+        timeLastTouched = micros();
 
         touch->getTouchPoint(&xTouch, &yTouch);
 
@@ -126,6 +132,10 @@ void loop()
             //only command processed here is a new game
             newGame();
         }
+    }
+    if (micros() - timeLastTouched > IDLE_TIME_BEFORE_SHUTDOWN_MSEC)
+    {
+        battery->shutDown();
     }
 }
 //end of main loop
@@ -332,35 +342,35 @@ void deleteTermsVert(Equation *equation)
  */
 void generateEquations()
 {
-    equHorz1->multiplicand_ = new Multi(&tft, 0, 0, FONT_WIDTH * 3, FONT_HEIGHT, FG_COLOUR, BG_COLOUR, BORDER_COLOUR);
-    equHorz1->operator_ = new Operator(&tft, FONT_WIDTH * 3, 0, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR);
-    equHorz1->multiplier_ = new Multi(&tft, FONT_WIDTH * 4, 0, FONT_WIDTH * 3, FONT_HEIGHT, FG_COLOUR, BG_COLOUR, BORDER_COLOUR);
-    equHorz1->equals_ = new Equals(&tft, FONT_WIDTH * 7, 0, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR);
-    equHorz1->product_ = new Product(&tft, FONT_WIDTH * 8, 0, FONT_WIDTH * 4, FONT_HEIGHT, FG_COLOUR, BG_COLOUR, BORDER_COLOUR);
+    equHorz1->multiplicand_ = new Multi(&lcdScreen, 0, 0, FONT_WIDTH * 3, FONT_HEIGHT, FG_COLOUR, BG_COLOUR, BORDER_COLOUR);
+    equHorz1->operator_ = new Operator(&lcdScreen, FONT_WIDTH * 3, 0, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR);
+    equHorz1->multiplier_ = new Multi(&lcdScreen, FONT_WIDTH * 4, 0, FONT_WIDTH * 3, FONT_HEIGHT, FG_COLOUR, BG_COLOUR, BORDER_COLOUR);
+    equHorz1->equals_ = new Equals(&lcdScreen, FONT_WIDTH * 7, 0, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR);
+    equHorz1->product_ = new Product(&lcdScreen, FONT_WIDTH * 8, 0, FONT_WIDTH * 4, FONT_HEIGHT, FG_COLOUR, BG_COLOUR, BORDER_COLOUR);
     equHorz1->setState(PRODUCT_UNSELECTED);
     checkDivideByZero(equHorz1);
 
-    equHorz2->multiplicand_ = new Multi(&tft, 0, FONT_HEIGHT * 2, FONT_WIDTH * 3, FONT_HEIGHT, FG_COLOUR, BG_COLOUR, BORDER_COLOUR);
-    equHorz2->operator_ = new Operator(&tft, FONT_WIDTH * 3, FONT_HEIGHT * 2, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR);
-    equHorz2->multiplier_ = new Multi(&tft, FONT_WIDTH * 4, FONT_HEIGHT * 2, FONT_WIDTH * 3, FONT_HEIGHT, FG_COLOUR, BG_COLOUR, BORDER_COLOUR);
-    equHorz2->equals_ = new Equals(&tft, FONT_WIDTH * 7, FONT_HEIGHT * 2, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR);
-    equHorz2->product_ = new Product(&tft, FONT_WIDTH * 8, FONT_HEIGHT * 2, FONT_WIDTH * 4, FONT_HEIGHT, FG_COLOUR, BG_COLOUR, BORDER_COLOUR);
+    equHorz2->multiplicand_ = new Multi(&lcdScreen, 0, FONT_HEIGHT * 2, FONT_WIDTH * 3, FONT_HEIGHT, FG_COLOUR, BG_COLOUR, BORDER_COLOUR);
+    equHorz2->operator_ = new Operator(&lcdScreen, FONT_WIDTH * 3, FONT_HEIGHT * 2, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR);
+    equHorz2->multiplier_ = new Multi(&lcdScreen, FONT_WIDTH * 4, FONT_HEIGHT * 2, FONT_WIDTH * 3, FONT_HEIGHT, FG_COLOUR, BG_COLOUR, BORDER_COLOUR);
+    equHorz2->equals_ = new Equals(&lcdScreen, FONT_WIDTH * 7, FONT_HEIGHT * 2, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR);
+    equHorz2->product_ = new Product(&lcdScreen, FONT_WIDTH * 8, FONT_HEIGHT * 2, FONT_WIDTH * 4, FONT_HEIGHT, FG_COLOUR, BG_COLOUR, BORDER_COLOUR);
     equHorz2->setState(PRODUCT_UNSELECTED);
     checkDivideByZero(equHorz2);
 
     equVert1->multiplicand_ = equHorz1->multiplicand_;
-    equVert1->operator_ = new Operator(&tft, FONT_WIDTH, FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR);
+    equVert1->operator_ = new Operator(&lcdScreen, FONT_WIDTH, FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR);
     equVert1->multiplier_ = equHorz2->multiplicand_;
-    equVert1->equals_ = new Equals(&tft, FONT_WIDTH, FONT_HEIGHT * 3, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR);
-    equVert1->product_ = new Product(&tft, 0, FONT_HEIGHT * 4, FONT_WIDTH * 4, FONT_HEIGHT, FG_COLOUR, BG_COLOUR, BORDER_COLOUR);
+    equVert1->equals_ = new Equals(&lcdScreen, FONT_WIDTH, FONT_HEIGHT * 3, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR);
+    equVert1->product_ = new Product(&lcdScreen, 0, FONT_HEIGHT * 4, FONT_WIDTH * 4, FONT_HEIGHT, FG_COLOUR, BG_COLOUR, BORDER_COLOUR);
     equVert1->setState(PRODUCT_UNSELECTED);
     checkDivideByZero(equVert1);
 
     equVert2->multiplicand_ = equHorz1->multiplier_;
-    equVert2->operator_ = new Operator(&tft, FONT_WIDTH * 5, FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR);
+    equVert2->operator_ = new Operator(&lcdScreen, FONT_WIDTH * 5, FONT_HEIGHT, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR);
     equVert2->multiplier_ = equHorz2->multiplier_;
-    equVert2->equals_ = new Equals(&tft, FONT_WIDTH * 5, FONT_HEIGHT * 3, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR);
-    equVert2->product_ = new Product(&tft, FONT_WIDTH * 4, FONT_HEIGHT * 4, FONT_WIDTH * 4, FONT_HEIGHT, FG_COLOUR, BG_COLOUR, BORDER_COLOUR);
+    equVert2->equals_ = new Equals(&lcdScreen, FONT_WIDTH * 5, FONT_HEIGHT * 3, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR);
+    equVert2->product_ = new Product(&lcdScreen, FONT_WIDTH * 4, FONT_HEIGHT * 4, FONT_WIDTH * 4, FONT_HEIGHT, FG_COLOUR, BG_COLOUR, BORDER_COLOUR);
     equVert2->setState(PRODUCT_UNSELECTED);
     checkDivideByZero(equVert2);
 
@@ -394,14 +404,14 @@ void displayNumbers()
     char c = '0';
     uint8_t i = 0;
 
-    numbersOnScreen[i++] = new Number(&tft, x, FONT_HEIGHT * 5, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR, '-');
+    numbersOnScreen[i++] = new Number(&lcdScreen, x, FONT_HEIGHT * 5, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR, '-');
 
     x += FONT_WIDTH;
 
     //start loop at 1 as the '-' uses numberOnScreen[0]
     for (; i < 11; i++, x += FONT_WIDTH, c += 1)
     {
-        numbersOnScreen[i] = new Number(&tft, x, FONT_HEIGHT * 5, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR, c);
+        numbersOnScreen[i] = new Number(&lcdScreen, x, FONT_HEIGHT * 5, FONT_WIDTH, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR, c);
     }
 }
 
@@ -419,9 +429,9 @@ void displayNumbers()
 void displayCommands()
 {
     int16_t x = 0;
-    for (uint8_t i = 0; i < NO_COMMANDS; i++, x += FONT_WIDTH * 3)
+    for (uint8_t i = 0; i < NUMBER_COMMANDS; i++, x += FONT_WIDTH * 3)
     {
-        commandsOnScreen[i] = new Command(&tft, x, FONT_HEIGHT * 6, FONT_WIDTH * 3, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR, commandStrings[i]);
+        commandsOnScreen[i] = new Command(&lcdScreen, x, FONT_HEIGHT * 6, FONT_WIDTH * 3, FONT_HEIGHT, FG_COLOUR, BG_COLOUR_OPER, BORDER_COLOUR, commandStrings[i]);
     }
 }
 

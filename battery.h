@@ -1,7 +1,7 @@
 /*
  * Class Battery
  *
- * Handle operating from battery.
+ * Handle operating from battery. 
  */
 
 #ifndef Battery_h
@@ -14,6 +14,10 @@ class Battery
 
 public:
     void shutDown()
+    {
+    }
+
+    void wakeup()
     {
     }
 };
