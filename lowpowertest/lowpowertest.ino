@@ -1,23 +1,5 @@
 #include "LowPower.h"
 
-void setup()
-{
-  pinMode(13,OUTPUT);
-}
-
-void loop() 
-{
-  digitalWrite(13,HIGH);
-  delay(2000);
-  digitalWrite(13,LOW);
-  LowPower.powerDown(SLEEP_2S, ADC_OFF, BOD_OFF);
-}
-
-#include "ArduinoLowPower.h"
-
-// Blink sequence number
-// Declare it volatile since it's incremented inside an interrupt
-volatile int repetitions = 1;
 
 // Pin used to trigger a wakeup
 const int pin = 8;
