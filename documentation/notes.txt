@@ -1,0 +1,8 @@
+NOTES:
+
+to use git push, had to use the following format
+
+$ git remote add origin https://vonkratzmann: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@github.com/vonkratzmann/maths.git
+
+the git push --set-upstream origin battery
+
