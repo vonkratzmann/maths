@@ -1,0 +1,7 @@
+{
+    "board": "arduino:avr:uno",
+    "programmer": "arduino:stk500",
+    "port": "COM4",
+    "sketch": "lowpowertest\\maths.ino",
+    "output": ".\\ArduinoOutput"
+}

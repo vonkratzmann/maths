@@ -21,3 +21,6 @@ In the Sketch menu, select Upload with Programmer.
 
 C:\Program Files (x86)\arduino-1.8.15\hardware\tools\avr/bin/avrdude -CC:\Program Files (x86)\arduino-1.8.15\hardware\tools\avr/etc/avrdude.conf -v -patmega328p -cstk500 -PCOM4 -Uflash:w:C:\Users\vonkr\AppData\Local\Temp\arduino_build_636876/blink.ino.hex:i 
 
+  // "sketch": "blink\\blink.ino",  
+    "sketch": "lowpowertest\\lowpertest.ino",
+  // "sketch": "maths.ino",  

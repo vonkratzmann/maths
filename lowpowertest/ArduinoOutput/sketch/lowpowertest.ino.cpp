@@ -1,3 +1,5 @@
+#include <Arduino.h>
+#line 1 "c:\\Users\\vonkr\\Documents\\kirk\\maths\\lowpowertest\\lowpowertest.ino"
 #include "LowPower.h"
 #include <avr/sleep.h>
 
@@ -13,6 +15,11 @@
 
 bool volatile flashFast = true;
 
+#line 16 "c:\\Users\\vonkr\\Documents\\kirk\\maths\\lowpowertest\\lowpowertest.ino"
+void setup();
+#line 37 "c:\\Users\\vonkr\\Documents\\kirk\\maths\\lowpowertest\\lowpowertest.ino"
+void loop();
+#line 16 "c:\\Users\\vonkr\\Documents\\kirk\\maths\\lowpowertest\\lowpowertest.ino"
 void setup()
 {
     BLINK_DDR |= (1 << BLINK_PIN); // set as output
