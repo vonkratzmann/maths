@@ -95,13 +95,24 @@
  */
 #define NUMBER_OPERATORS_IN_USE 5
 
-#define IDLE_TIME_BEFORE_SHUTDOWN_MSEC 5*60*1000
+#define IDLE_TIME_BEFORE_SHUTDOWN_MSEC 5 * 60 * 1000
 //use PORTC bit 0 for wakeup pin, when in low power mode,
 //pin 23 on ATMega328P, A0 in datasheet, PCINT8,
 //called A5 on Arduino Uno board.
 #define WAKE_UP_PIN PORTC0
 #define WAKE_UP_PORT PORTC
 #define WAKE_UP_DDR DDRC
-#define WAKEUP_PIN PORTC0
+
+/*
+ * On boot ie a power up, define equations in heap.
+ * When user starts a new game or coming out of "power down" mode,
+ * the old equation defintions in the heap are deleted and
+ * new equations defined. 
+ */
+enum powerUp
+{
+    Boot,
+    Reset
+};
 
 #endif

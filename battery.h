@@ -2,7 +2,7 @@
  * Class Battery
  *
  * Handle operating from battery,
- * 
+ *
  */
 
 #ifndef Battery_h

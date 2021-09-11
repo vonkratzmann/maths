@@ -103,7 +103,7 @@ void setup()
     touch = new Touch();
     battery = new Battery();
 
-    newGame();
+    newGame(Boot);
 }
 
 void loop()
@@ -135,7 +135,7 @@ void loop()
         else if ((commandTouched = isCommandTouched(xTouch, yTouch)) != '\0')
         {
             //only command processed here is a new game
-            newGame();
+            newGame(Reset);
         }
     }
     if (micros() - timeLastTouched > IDLE_TIME_BEFORE_SHUTDOWN_MSEC)
@@ -145,7 +145,7 @@ void loop()
     if (justWokenUp)
     {
         justWokenUp = false;
-        newGame();
+        newGame(Reset);
     }
 }
 //end of main loop
@@ -281,22 +281,29 @@ void processNumberTouched(char c)
 /*
  * newGame()
  *
- * Deletes the current terms in each equation,
+ * Deepending on the type of restart,
+ * deletes the current terms in each equation,
  * freeing up heap memory and
  * the generate new equations.
- * Numbers and commands are not updated as these do not change between games.
+ * Similarly with numbers and commands.
  *
  * Delete terms in the reverse order in which they were created.
  * Aim was to minimise heap fragmentation.
  *
  * Clears overRide code, which overrides any answer to always give the correct answer
  */
-void newGame()
+void newGame(enum powerUp startUpType)
 {
-    deleteTermsVert(equVert2);
-    deleteTermsVert(equVert1);
-    deleteTermsHorz(equHorz2);
-    deleteTermsHorz(equHorz1);
+    if (startUpType == Reset)
+    {
+        deleteTermsVert(equVert2);
+        deleteTermsVert(equVert1);
+        deleteTermsHorz(equHorz2);
+        deleteTermsHorz(equHorz1);
+
+        deleteNumbers();
+        deleteComands();
+    }
     generateEquations();
     displayNumbers();
     displayCommands();
@@ -315,14 +322,11 @@ void newGame()
  */
 void deleteTermsHorz(Equation *equation)
 {
-    if (equation->product_ != NULL)
-    {
-        delete (equation->product_);
-        delete (equation->equals_);
-        delete (equation->multiplier_);
-        delete (equation->operator_);
-        delete (equation->multiplicand_);
-    }
+    delete (equation->product_);
+    delete (equation->equals_);
+    delete (equation->multiplier_);
+    delete (equation->operator_);
+    delete (equation->multiplicand_);
 }
 
 /*
@@ -340,11 +344,32 @@ void deleteTermsHorz(Equation *equation)
 
 void deleteTermsVert(Equation *equation)
 {
-    if (equation->product_ != NULL)
+    delete (equation->product_);
+    delete (equation->equals_);
+    delete (equation->operator_);
+}
+
+/*
+ * deleteNumbers()
+ */
+
+void deleteNumbers()
+{
+    for (uint8_t i = 0; i < 11; i++)
     {
-        delete (equation->product_);
-        delete (equation->equals_);
-        delete (equation->operator_);
+        delete (numbersOnScreen[i]);
+    }
+}
+
+/*
+ * deleteComands()
+ */
+
+deleteComands()
+{
+    for (uint8_t i = 0; i < NUMBER_COMMANDS; i++)
+    {
+        delete (commandsOnScreen[i]);
     }
 }
 
@@ -417,7 +442,7 @@ void checkDivideByZero(Equation *equation)
 /*
  * displayNumbers()
  *
- * These are displayed on the screen
+ * These are displayed on the screen for the user to select
  * '-', '0', '1', .. '9'
  */
 void displayNumbers()

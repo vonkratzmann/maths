@@ -30,9 +30,6 @@ public:
     Equals *equals_;
     Product *product_;
 
-    //constructor
-    Equation();
-
     /*
      * calculateAnswer()
      */
