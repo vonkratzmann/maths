@@ -24,3 +24,62 @@ C:\Program Files (x86)\arduino-1.8.15\hardware\tools\avr/bin/avrdude -CC:\Progra
   // "sketch": "blink\\blink.ino",  
     "sketch": "lowpowertest\\lowpertest.ino",
   // "sketch": "maths.ino",  
+
+4.
+Using Visual Studio Code and Pololu AVR programmer, compile Using Visual Studio Code.
+Then there is a windows batch command under "scripts" to load the compiled hex file into the the ATMega 328P micro. 
+Run this under a power shell terminal.
+
+5. Sleep Mode
+Use Power-down mode sleep mode.
+
+BOD:
+Set Disable BOD by software, turned off after entering sleep mode.
+
+To disable BOD in relevant sleep modes,
+both BODS and BODSE must first be set to one. Then, to set the BODS bit, 
+BODS must be set to one and BODSE must be set to zero within four clock cycles in the MCUCR - MCU Control register.
+A sleep instruction must be executed while BODS is active.
+
+BOD automatically turned on after a wakeup.
+
+POWER REDUCTION REGISTER:
+Module shutdown can be used in Idle mode and active mode to significantly reduce the overall power consumption. 
+In all other sleep modes, the clock is already stopped.
+
+ADC
+If enabled, the ADC will be enabled in all sleep modes. To save power, 
+the ADC should be disabled before entering any sleep mode. 
+hen the ADC is turned off and on again, the next conversion will be an extended conversion. 
+
+Analog Comparator
+When entering Idle mode, the analog comparator should be disabled if not used. 
+When entering ADC noise reduction mode, the analog comparator should be disabled. 
+In other sleep modes, the analog comparator is automatically disabled. 
+However, if the analog comparator is set up to use the internal voltage reference as input, 
+he analog comparator should be disabled in all sleep modes.
+
+Watchdog Timer
+If the watchdog timer is not needed in the application, the module should be turned off. 
+If the watchdog timer is enabled, it will be enabled in all sleep modes and hence always consume power. 
+In the deeper sleep modes, this will contribute significantly to the total current consumption. 
+
+
+SMCR – Sleep Mode Control Register
+
+Power-down Mode:
+SM2 0, SM1 1, SM0 0 
+Bit3,   Bit2, Bit 1 
+
+Sleep Enable Bit 0.
+The SE bit must be written to logic one to make the MCU enter the sleep mode when the SLEEP instruction is executed. To avoid the MCU entering the sleep mode unless it is the programmer’s purpose, it is recommended to write the sleep enable (SE) bit to one just before the execution of the SLEEP instruction and to clear it immediately after waking up.
+
+Used LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
+
+Results of test program with ATMega328P on bread board:
+Normal current: 4.5ma
+Sleep power down mode:(could not current read on my meter)
+
+With an internal pullup on A0, still could not read current on my meter.
+With a pullup on reset, still could not read current on my meter.
+

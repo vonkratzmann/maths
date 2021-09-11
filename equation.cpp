@@ -9,6 +9,17 @@
 
 #include "equation.h"
 
+//constructor
+Equation::Equation()
+{
+    multiplicand_ = NULL;
+    operator_ = NULL;
+    multiplier_ = NULL;
+    equals_ = NULL;
+    product_ = NULL;
+}
+//End of constructor
+
 /*
  * calculateAnswer()
  */

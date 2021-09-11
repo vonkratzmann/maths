@@ -13,12 +13,18 @@
 
 bool volatile flashFast = true;
 
+ISR(PCINT1_vect)
+{
+    flashFast = false;
+}
+
 void setup()
 {
     BLINK_DDR |= (1 << BLINK_PIN); // set as output
 
-    // Configure wake up pin as input.
-    // This will consume a few uA of current.
+    //configure wake up pin as input.
+    //configure internal pullup.
+    //this will consume a few uA of current.
     WAKE_UP_DDR &= ~(1 << WAKE_UP_PIN);
     WAKE_UP_PORT |= (1 << WAKE_UP_PIN);
 
@@ -26,12 +32,16 @@ void setup()
     PCICR |= B00000010;
     PCMSK1 |= B00000001; //interrupt on A0, PCINT8
     sei();
-    asm("nop \n");
-}
 
-ISR(PCINT1_vect)
-{
-    flashFast = false;
+    PORTB &= ~(1 << BLINK_PIN); //set it low
+    delay(250);
+    PORTB |= (1 << BLINK_PIN); //set it high
+    delay(250);
+    PORTB &= ~(1 << BLINK_PIN); //set it low
+    delay(250);
+    PORTB |= (1 << BLINK_PIN); //set it high
+
+    sleep();
 }
 
 void loop()
@@ -50,4 +60,18 @@ void loop()
         delay(1000);
         PORTB |= (1 << BLINK_PIN); //set it high
     }
+}
+
+void sleep()
+{
+    asm("nop \n"); //kk  test
+
+    //turn off analogue comparator
+    cli();
+    ACSR |= (1 << ACD);
+    sei();
+
+    //WDT is turned off in power down mode with SLEEP_FOREVER
+
+    LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
 }

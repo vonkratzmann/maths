@@ -73,13 +73,20 @@ char operators[5] = {'+', '*', '-', '/', '%'};
  */
 bool overRide = false;
 
+bool volatile justWokenUp = false;
+/* 
+ * Interrupt used for wake up after being put into low power mode
+ */
+ISR(PCINT1_vect)
+{
+    justWokenUp = true;
+}
+
 void setup()
 {
 #ifdef DEBUG
     Serial.begin(9600);
 #endif
-
-    randomSeed(analogRead(A5)); //Seed generator with noise from unused AIN
 
     uint16_t ID = lcdScreen.readID();
     lcdScreen.begin(ID);
@@ -96,9 +103,7 @@ void setup()
     touch = new Touch();
     battery = new Battery();
 
-    generateEquations();
-    displayNumbers();
-    displayCommands();
+    newGame();
 }
 
 void loop()
@@ -136,6 +141,11 @@ void loop()
     if (micros() - timeLastTouched > IDLE_TIME_BEFORE_SHUTDOWN_MSEC)
     {
         battery->shutDown();
+    }
+    if (justWokenUp)
+    {
+        justWokenUp = false;
+        newGame();
     }
 }
 //end of main loop
@@ -288,6 +298,8 @@ void newGame()
     deleteTermsHorz(equHorz2);
     deleteTermsHorz(equHorz1);
     generateEquations();
+    displayNumbers();
+    displayCommands();
 
     overRide = false;
 }
@@ -298,14 +310,19 @@ void newGame()
  * Delete the heap memory that has been allocated to the equation terms
  * by the earlier new() calls. This is to free up heap memory before
  * generating new equations using new() calls.
+ * Check the pointers exist, before deleting,
+ * this covers the case where just powered up and equations not generated.
  */
 void deleteTermsHorz(Equation *equation)
 {
-    delete (equation->product_);
-    delete (equation->equals_);
-    delete (equation->multiplier_);
-    delete (equation->operator_);
-    delete (equation->multiplicand_);
+    if (equation->product_ != NULL)
+    {
+        delete (equation->product_);
+        delete (equation->equals_);
+        delete (equation->multiplier_);
+        delete (equation->operator_);
+        delete (equation->multiplicand_);
+    }
 }
 
 /*
@@ -317,13 +334,18 @@ void deleteTermsHorz(Equation *equation)
  * after they have been deleted in deleteTermsHorz(),
  * the heap memory has already been deallocated and the pointer is no longer valid
  * and the program will crash.
+ * Check the pointers exist, before deleting,
+ * this covers the case where just powered up and equations not generated.
  */
 
 void deleteTermsVert(Equation *equation)
 {
-    delete (equation->product_);
-    delete (equation->equals_);
-    delete (equation->operator_);
+    if (equation->product_ != NULL)
+    {
+        delete (equation->product_);
+        delete (equation->equals_);
+        delete (equation->operator_);
+    }
 }
 
 /*
