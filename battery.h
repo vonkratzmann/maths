@@ -26,7 +26,7 @@ public:
         //enable interrupts on wakeup pin
         cli();
         PCICR |= B00000010;
-        PCMSK1 |= B00000001; //interrupt on PCINT8, Portc0
+        PCMSK1 |= B00000001; //interrupt on PCINT8, PortC0
         sei();
 
         //turn off analogue comparator
@@ -37,10 +37,6 @@ public:
         //WDT is turned off in power down mode with SLEEP_FOREVER,
         //so need to specifically turn it off.
         LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
-    }
-
-    void wakeup()
-    {
     }
 };
 

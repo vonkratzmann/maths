@@ -1,3 +1,4 @@
+
 /*
  * Maths defines and constants
  */
@@ -9,7 +10,7 @@
 #include "Fonts\FreeMono18pt7b.h"
 
 //comment out define below if not debugging
-//#define DEBUG
+#define DEBUG
 
 //display text message, variable name and value
 #ifdef DEBUG
@@ -95,7 +96,8 @@
  */
 #define NUMBER_OPERATORS_IN_USE 5
 
-#define IDLE_TIME_BEFORE_SHUTDOWN_MSEC 5 * 60 * 1000
+// kk #define IDLE_TIME_BEFORE_SHUTDOWN_MSEC 5 * 60 * 1000
+#define IDLE_TIME_BEFORE_SHUTDOWN_MSEC  20 * 1000
 //use PORTC bit 0 for wakeup pin, when in low power mode,
 //pin 23 on ATMega328P, A0 in datasheet, PCINT8,
 //called A5 on Arduino Uno board.

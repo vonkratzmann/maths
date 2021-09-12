@@ -74,12 +74,14 @@ char operators[5] = {'+', '*', '-', '/', '%'};
 bool overRide = false;
 
 bool volatile justWokenUp = false;
+long timeLastTouched;
 /* 
  * Interrupt used for wake up after being put into low power mode
  */
 ISR(PCINT1_vect)
 {
     justWokenUp = true;
+    Serial.println("isr");  //kk 
 }
 
 void setup()
@@ -108,42 +110,41 @@ void setup()
 
 void loop()
 {
-    long timeLastTouched;
     if (touch->isThereATouch())
     {
         int16_t xTouch;
         int16_t yTouch;
-
         char numberTouched;
         char commandTouched;
         int8_t equationNumberTouched;
 
-        timeLastTouched = micros();
-
+        timeLastTouched = millis();
         touch->getTouchPoint(&xTouch, &yTouch);
 
         if ((equationNumberTouched = isEquationTouched(xTouch, yTouch)) != 0)
         {
             processEquationTouched(equationNumberTouched);
         }
-
         else if ((numberTouched = isNumberTouched(xTouch, yTouch)) != '\0')
         {
             processNumberTouched(numberTouched);
         }
-
         else if ((commandTouched = isCommandTouched(xTouch, yTouch)) != '\0')
         {
             //only command processed here is a new game
             newGame(Reset);
         }
     }
-    if (micros() - timeLastTouched > IDLE_TIME_BEFORE_SHUTDOWN_MSEC)
+    
+    if (millis() - timeLastTouched > IDLE_TIME_BEFORE_SHUTDOWN_MSEC)
     {
-        battery->shutDown();
+      dbg("timeout", timeLastTouched) 
+        delay(250); //allow time to print the message
+       battery->shutDown();
     }
     if (justWokenUp)
     {
+        dbg("wokeup", justWokenUp)
         justWokenUp = false;
         newGame(Reset);
     }
@@ -302,12 +303,13 @@ void newGame(enum powerUp startUpType)
         deleteTermsHorz(equHorz1);
 
         deleteNumbers();
-        deleteComands();
+        deleteCommands();
     }
     generateEquations();
     displayNumbers();
     displayCommands();
-
+    
+    timeLastTouched = millis();
     overRide = false;
 }
 
@@ -365,7 +367,7 @@ void deleteNumbers()
  * deleteComands()
  */
 
-deleteComands()
+void deleteCommands()
 {
     for (uint8_t i = 0; i < NUMBER_COMMANDS; i++)
     {

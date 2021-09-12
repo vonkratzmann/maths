@@ -16,11 +16,15 @@ bool volatile flashFast = true;
 ISR(PCINT1_vect)
 {
     flashFast = false;
+    Serial.println("Isr");
 }
 
 void setup()
 {
     BLINK_DDR |= (1 << BLINK_PIN); // set as output
+
+    Serial.begin(9600);
+    Serial.println("Started");
 
     //configure wake up pin as input.
     //configure internal pullup.
