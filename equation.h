@@ -13,7 +13,6 @@
 #include <arduino.h>
 #include "maths.h"
 #include "terms.h"
-//kk#include <MCUFRIEND_kbv.h>
 
 extern bool overRide;
 extern char operators[5];

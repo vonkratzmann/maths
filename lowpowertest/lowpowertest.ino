@@ -68,8 +68,6 @@ void loop()
 
 void sleep()
 {
-    asm("nop \n"); //kk  test
-
     //turn off analogue comparator
     cli();
     ACSR |= (1 << ACD);

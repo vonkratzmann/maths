@@ -9,15 +9,19 @@
 #include "MCUFRIEND_kbv.h"
 #include "Fonts\FreeMono18pt7b.h"
 
-//comment out define below if not debugging
-#define DEBUG
+//comment out define if not debugging
+//#define DEBUG
 
 //display text message, variable name and value
 #ifdef DEBUG
-#define dbg(myFixedText, variableName)                \
+#define DEBUG_VAR(myFixedText, variableName)          \
     Serial.print(#myFixedText " " #variableName "="); \
     Serial.println(variableName);
-
+#define DEBUG_SER(myFixedText) \
+    Serial.print(#myFixedText);
+#else
+#define DEBUG_VAR(myFixedText, variableName)
+#define DEBUG_SER(myFixedText)
 //#define DEBUG_TOUCHED
 #endif
 
@@ -96,25 +100,36 @@
  */
 #define NUMBER_OPERATORS_IN_USE 5
 
-// kk #define IDLE_TIME_BEFORE_SHUTDOWN_MSEC 5 * 60 * 1000
-#define IDLE_TIME_BEFORE_SHUTDOWN_MSEC  20 * 1000
+#ifdef DEBUG
+#define IDLE_TIME_BEFORE_SHUTDOWN_MSEC 20 * 1000
+#else
+#define IDLE_TIME_BEFORE_SHUTDOWN_MSEC 5 * 60 * 1000
+
+#endif
 //use PORTC bit 0 for wakeup pin, when in low power mode,
-//pin 23 on ATMega328P, A0 in datasheet, PCINT8,
-//called A5 on Arduino Uno board.
+//pin 23 on ATMega328P, ADC0, PCINT8.
 #define WAKE_UP_PIN PORTC0
 #define WAKE_UP_PORT PORTC
 #define WAKE_UP_DDR DDRC
 
 /*
- * On boot ie a power up, define equations in heap.
- * When user starts a new game or coming out of "power down" mode,
- * the old equation defintions in the heap are deleted and
- * new equations defined. 
+ * Boot - ie a power up.
+ * Reset - user starts a new game or coming out of "power down" mode.
+ * For reset the class defintions for Equation, Number and Command,
+ * have to be deleted before new Equations Number and Command,
+ * are defined. Stops memory leaks.
  */
-enum powerUp
+enum newGameStarting
 {
     Boot,
     Reset
+};
+
+enum WhichCommand
+{
+    Enter,
+    BackSpace,
+    NewGame
 };
 
 #endif

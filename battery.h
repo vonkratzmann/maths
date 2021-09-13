@@ -38,6 +38,13 @@ public:
         //so need to specifically turn it off.
         LowPower.powerDown(SLEEP_FOREVER, ADC_OFF, BOD_OFF);
     }
+
+    void disableWakeUpInterrupts()
+    {
+        cli();
+        PCMSK1 &= ~B00000001; //interrupt on PCINT8, PortC0
+        sei();
+    }
 };
 
 #endif

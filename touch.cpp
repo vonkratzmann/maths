@@ -74,7 +74,7 @@ void Touch::getTouchPoint(int16_t *x, int16_t *y)
     *y = map(tp.y, TS_TOP, TS_BOT, 0, HEIGHT);
 #else
     // For landscape had to swap x and y and the calibration values.
-    *y = map(tp.x, TS_RT, TS_LEFT, 0, HEIGHT); //kk check
-    *x = map(tp.y, TS_BOT, TS_TOP, 0, WIDTH);  //kk check
+    *y = map(tp.x, TS_RT, TS_LEFT, 0, HEIGHT);
+    *x = map(tp.y, TS_BOT, TS_TOP, 0, WIDTH);
 #endif
 }

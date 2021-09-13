@@ -75,13 +75,15 @@ bool overRide = false;
 
 bool volatile justWokenUp = false;
 long timeLastTouched;
-/* 
+
+/*
  * Interrupt used for wake up after being put into low power mode
  */
 ISR(PCINT1_vect)
 {
+    battery->disableWakeUpInterrupts();
     justWokenUp = true;
-    Serial.println("isr");  //kk 
+    DEBUG_SER("isr")
 }
 
 void setup()
@@ -114,42 +116,50 @@ void loop()
     {
         int16_t xTouch;
         int16_t yTouch;
-        char numberTouched;
-        char commandTouched;
-        int8_t equationNumberTouched;
 
         timeLastTouched = millis();
         touch->getTouchPoint(&xTouch, &yTouch);
-
-        if ((equationNumberTouched = isEquationTouched(xTouch, yTouch)) != 0)
-        {
-            processEquationTouched(equationNumberTouched);
-        }
-        else if ((numberTouched = isNumberTouched(xTouch, yTouch)) != '\0')
-        {
-            processNumberTouched(numberTouched);
-        }
-        else if ((commandTouched = isCommandTouched(xTouch, yTouch)) != '\0')
-        {
-            //only command processed here is a new game
-            newGame(Reset);
-        }
+        processTouch(xTouch, yTouch);
     }
-    
+
     if (millis() - timeLastTouched > IDLE_TIME_BEFORE_SHUTDOWN_MSEC)
     {
-      dbg("timeout", timeLastTouched) 
+        DEBUG_SER("timeout");
         delay(250); //allow time to print the message
-       battery->shutDown();
+        battery->shutDown();
     }
     if (justWokenUp)
     {
-        dbg("wokeup", justWokenUp)
+        DEBUG_SER("wokenup");
         justWokenUp = false;
         newGame(Reset);
     }
 }
 //end of main loop
+
+/*
+ * processTouch()
+ */
+void processTouch(int16_t xTouch, int16_t yTouch)
+{
+    char numberTouched;
+    char commandTouched;
+    int8_t equationNumberTouched;
+
+    if ((equationNumberTouched = isEquationTouched(xTouch, yTouch)) != 0)
+    {
+        processEquationTouched(equationNumberTouched);
+    }
+    else if ((numberTouched = isNumberTouched(xTouch, yTouch)) != '\0')
+    {
+        processNumberTouched(numberTouched);
+    }
+    else if ((commandTouched = isCommandTouched(xTouch, yTouch)) != '\0')
+    {
+        //only command processed here is a new game
+        newGame(Reset);
+    }
+}
 
 /*
  * isEquationTouched()
@@ -191,11 +201,11 @@ char isNumberTouched(int16_t xTouch, int16_t yTouch)
     {
         return '-';
     }
-    if (commandsOnScreen[0]->touched(xTouch, yTouch)) //kk fix, instead of zero put label
+    if (commandsOnScreen[Enter]->touched(xTouch, yTouch))
     {
         return 'e';
     }
-    if (commandsOnScreen[1]->touched(xTouch, yTouch)) //kk fix, instead of one put label
+    if (commandsOnScreen[BackSpace]->touched(xTouch, yTouch))
     {
         return 'b';
     }
@@ -209,7 +219,7 @@ char isNumberTouched(int16_t xTouch, int16_t yTouch)
  */
 char isCommandTouched(int16_t xTouch, int16_t yTouch)
 {
-    if (commandsOnScreen[2]->touched(xTouch, yTouch)) //kk need to fix, instead of two put label
+    if (commandsOnScreen[NewGame]->touched(xTouch, yTouch))
     {
         return 'n'; //new game
     }
@@ -293,7 +303,7 @@ void processNumberTouched(char c)
  *
  * Clears overRide code, which overrides any answer to always give the correct answer
  */
-void newGame(enum powerUp startUpType)
+void newGame(enum newGameStarting startUpType)
 {
     if (startUpType == Reset)
     {
@@ -306,9 +316,10 @@ void newGame(enum powerUp startUpType)
         deleteCommands();
     }
     generateEquations();
-    displayNumbers();
     displayCommands();
-    
+    displayNumbers();
+
+    //timeLastTouched updated in case just woken up from low power state
     timeLastTouched = millis();
     overRide = false;
 }
