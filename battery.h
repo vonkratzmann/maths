@@ -11,6 +11,8 @@
 #include "maths.h"
 #include "LowPower.h"
 #include <avr/sleep.h>
+//Line below to stop IDE complaining about undefined values
+#include "C:\Program Files (x86)\arduino-1.8.15\hardware\tools\avr\avr\include\avr\iom328p.h"
 
 class Battery
 {

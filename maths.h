@@ -6,6 +6,7 @@
 #ifndef Maths_h
 #define Maths_h
 
+#include <Arduino.h>
 #include "MCUFRIEND_kbv.h"
 #include "Fonts\FreeMono18pt7b.h"
 

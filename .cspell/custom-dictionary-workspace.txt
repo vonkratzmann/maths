@@ -1,2 +1,6 @@
 # Custom Dictionary Words
+mcufriend
+VCOMG
 wokenup
+xpos
+ypos

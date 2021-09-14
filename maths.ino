@@ -29,6 +29,9 @@
  * The maximum number of characters that can be entered in the product field is 4, ie "-999".
  * All arithmetic is integer based.
  * There is check to ensure the randomn number generator does not generate a divide by '0'.
+ * 
+ * Note libraries such as Adafruit_GFX, MCUFRIEND, Low-Power-Master et etc 
+ * are not included in the repo.
  */
 
 #include "maths.h"
